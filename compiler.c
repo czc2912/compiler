@@ -419,24 +419,24 @@ void block(int tx)
         }
     }
 
-    if (sym == varsym) /* 遇到变量声明符号，开始处理变量声明 */
-    {
-        getsym();
-        vardeclaration(&tx);
-        while (sym == comma)
-        {
-            getsym();
-            vardeclaration(&tx);
-        }
-        if (sym == semicolon)
-        {
-            getsym();
-        }
-        else
-        {
-            error(5); /* 漏掉了分号 */
-        }
-    }
+    // if (sym == varsym) /* 遇到变量声明符号，开始处理变量声明 */
+    // {
+    //     getsym();
+    //     vardeclaration(&tx);
+    //     while (sym == comma)
+    //     {
+    //         getsym();
+    //         vardeclaration(&tx);
+    //     }
+    //     if (sym == semicolon)
+    //     {
+    //         getsym();
+    //     }
+    //     else
+    //     {
+    //         error(5); /* 漏掉了分号 */
+    //     }
+    // }
 
     while (sym == procsym) /* 遇到过程声明符号，开始处理过程声明 */
     {
@@ -566,28 +566,27 @@ void statement(int *ptx)
         i = position(id, *ptx); /* 查找标识符在符号表中的位置 */
         if (i == 0)
         {
-            error(11); /* 标识符未声明 */
+            enter(variable, ptx); // 填写符号表
+            // error(11); /* 标识符未声明 */
+        }
+        i = position(id, *ptx); /* 查找标识符在符号表中的位置 */
+        if (table[i].kind != variable)
+        {
+            error(12); /* 赋值语句中，赋值号左部标识符应该是变量 */
+            i = 0;
         }
         else
         {
-            if (table[i].kind != variable)
+            getsym();
+            if (sym == becomes)
             {
-                error(12); /* 赋值语句中，赋值号左部标识符应该是变量 */
-                i = 0;
+                getsym();
             }
             else
             {
-                getsym();
-                if (sym == becomes)
-                {
-                    getsym();
-                }
-                else
-                {
-                    error(13); /* 没有检测到赋值符号 */
-                }
-                expression(ptx); /* 处理赋值符号右侧表达式 */
+                error(13); /* 没有检测到赋值符号 */
             }
+            expression(ptx); /* 处理赋值符号右侧表达式 */
         }
     }
     else
