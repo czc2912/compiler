@@ -6,4 +6,6 @@ read b;
 write b;
 write a;
 write 2*a;
+if odd b then b := 1;
+write b;
 end.

@@ -17,7 +17,7 @@
 #define true 1
 #define false 0
 
-#define norw 13   /* 保留字个数 */
+#define norw 15   /* 保留字个数 */
 #define txmax 100 /* 符号表容量 */
 #define nmax 14   /* 数字的最大位数 */
 #define al 10     /* 标识符的最大长度 */
@@ -51,6 +51,8 @@ enum symbol
     thensym,
     whilesym,
     writesym,
+    repeatsym,
+    untilsym,
     readsym,
     dosym,
     callsym,
@@ -192,10 +194,12 @@ void init()
     strcpy(&(word[6][0]), "odd");
     strcpy(&(word[7][0]), "procedure");
     strcpy(&(word[8][0]), "read");
-    strcpy(&(word[9][0]), "then");
-    strcpy(&(word[10][0]), "var");
-    strcpy(&(word[11][0]), "while");
-    strcpy(&(word[12][0]), "write");
+    strcpy(&(word[9][0]), "repeat");
+    strcpy(&(word[10][0]), "then");
+    strcpy(&(word[11][0]), "until");
+    strcpy(&(word[12][0]), "var");
+    strcpy(&(word[13][0]), "while");
+    strcpy(&(word[14][0]), "write");
 
     /* 设置保留字符号 */
     wsym[0] = beginsym;
@@ -207,10 +211,12 @@ void init()
     wsym[6] = oddsym;
     wsym[7] = procsym;
     wsym[8] = readsym;
-    wsym[9] = thensym;
-    wsym[10] = varsym;
-    wsym[11] = whilesym;
-    wsym[12] = writesym;
+    wsym[9] = repeatsym;
+    wsym[10] = thensym;
+    wsym[11] = untilsym;
+    wsym[12] = varsym;
+    wsym[13] = whilesym;
+    wsym[14] = writesym;
 }
 
 /* 
@@ -292,6 +298,7 @@ void getsym()
         strcpy(id, a);
         i = 0;
         j = norw - 1;
+        // printf("id:%s\n", id);
         do
         { /* 搜索当前单词是否为保留字，使用二分法查找 */
             k = (i + j) / 2;
@@ -560,6 +567,7 @@ void vardeclaration(int *ptx)
 void statement(int *ptx)
 {
     int i;
+    // printf("%d\n", sym);
 
     if (sym == ident) /* 准备按照赋值语句处理 */
     {
@@ -673,6 +681,7 @@ void statement(int *ptx)
                 // }
                 do
                 {
+                    // printf("682\n");
                     getsym();
                     expression(ptx);    /* 调用表达式处理 */
                 } while (sym == comma); /* 一条write可输出多个变量的值 */
@@ -750,19 +759,35 @@ void statement(int *ptx)
                         }
                         else
                         {
-                            if (sym == whilesym) /* 准备按照while语句处理 */
+                            // if (sym == whilesym) /* 准备按照while语句处理 */
+                            // {
+                            //     getsym();
+                            //     condition(ptx); /* 调用条件处理 */
+                            //     if (sym == dosym)
+                            //     {
+                            //         getsym();
+                            //     }
+                            //     else
+                            //     {
+                            //         error(18); /* 缺少do */
+                            //     }
+                            //     statement(ptx); /* 循环体 */
+                            // }
+                            if (sym == repeatsym)
                             {
                                 getsym();
-                                condition(ptx); /* 调用条件处理 */
-                                if (sym == dosym)
+                                statement(ptx); /* 循环体 */
+
+                                // getsym();
+                                if (sym == untilsym)
                                 {
                                     getsym();
+                                    condition(ptx);
                                 }
                                 else
                                 {
-                                    error(18); /* 缺少do */
+                                    error(19); /* 缺少until */
                                 }
-                                statement(ptx); /* 循环体 */
                             }
                         }
                     }
