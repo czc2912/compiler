@@ -1,16 +1,11 @@
-var x
-procedure plus;
-         ^5
-var a,b;
-begin
- a=3;
-   ^13
-   ^24
- c:=7;
-  ^11
-  ^19
- x:=a+b;
-end;
-call plvs.         ^11
-
-===6 errors in pl/0 program!===
+0 const a=10;
+1 begin
+2 b:=12;
+4 b:=1;
+6 c:=1234;
+8 write(a);
+11 write(b);
+14 write(c);
+17 write(b)
+20 end.
+===Parsing success!===

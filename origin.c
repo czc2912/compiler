@@ -155,7 +155,7 @@ void factor(bool *fsys, int *ptx, int lev);
 void term(bool *fsys, int *ptx, int lev);
 void condition(bool *fsys, int *ptx, int lev);
 void expression(bool *fsys, int *ptx, int lev);
-void statement(bool *fsys, int *ptx, int lev, int *pdx);
+void statement(bool *fsys, int *ptx, int lev);
 void listcode(int cx0);
 void listall();
 void vardeclaration(int *ptx, int lev, int *pdx);
@@ -673,6 +673,29 @@ void block(int lev, int tx, bool *fsys)
             } while (sym == ident);
         }
 
+        if (sym == varsym) /* 遇到变量声明符号，开始处理变量声明 */
+        {
+            getsym();
+
+            do
+            {
+                vardeclaration(&tx, lev, &dx);
+                while (sym == comma)
+                {
+                    getsym();
+                    vardeclaration(&tx, lev, &dx);
+                }
+                if (sym == semicolon)
+                {
+                    getsym();
+                }
+                else
+                {
+                    error(5); /* 漏掉了分号 */
+                }
+            } while (sym == ident);
+        }
+
         while (sym == procsym) /* 遇到过程声明符号，开始处理过程声明 */
         {
             getsym();
@@ -722,7 +745,7 @@ void block(int lev, int tx, bool *fsys)
     table[tx0].adr = cx;         /* 记录当前过程代码地址 */
     table[tx0].size = dx;        /* 声明部分中每增加一条声明都会给dx增加1，声明部分已经结束，dx就是当前过程数据的size */
     cx0 = cx;
-    gen(ini, 0, 0); /* 生成指令，此指令执行时在数据栈中为被调用的过程开辟dx个单元的数据区 */
+    gen(ini, 0, dx); /* 生成指令，此指令执行时在数据栈中为被调用的过程开辟dx个单元的数据区 */
 
     if (tableswitch) /* 输出符号表 */
     {
@@ -758,8 +781,7 @@ void block(int lev, int tx, bool *fsys)
     memcpy(nxtlev, fsys, sizeof(bool) * symnum); /* 每个后继符号集合都包含上层后继符号集合，以便补救 */
     nxtlev[semicolon] = true;
     nxtlev[endsym] = true;
-    statement(nxtlev, &tx, lev, &dx);
-    code[cx0].a = dx;                         /* 回填dx */
+    statement(nxtlev, &tx, lev);
     gen(opr, 0, 0);                           /* 每个过程出口都要使用的释放数据段指令 */
     memset(nxtlev, 0, sizeof(bool) * symnum); /* 分程序没有补救集合 */
     test(fsys, nxtlev, 8);                    /* 检测后继符号正确性 */
@@ -907,7 +929,7 @@ void listall()
 /*
  * 语句处理 
  */
-void statement(bool *fsys, int *ptx, int lev, int *pdx)
+void statement(bool *fsys, int *ptx, int lev)
 {
     int i, cx1, cx2;
     bool nxtlev[symnum];
@@ -917,35 +939,33 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
         i = position(id, *ptx); /* 查找标识符在符号表中的位置 */
         if (i == 0)
         {
-            // error(11); /* 标识符未声明 */
-            vardeclaration(ptx, lev, pdx);
-            i = position(id, *ptx); /* 查找标识符在符号表中的位置 */
+            error(11); /* 标识符未声明 */
         }
         else
         {
-            getsym();
-        }
-        if (table[i].kind != variable)
-        {
-            error(12); /* 赋值语句中，赋值号左部标识符应该是变量 */
-            i = 0;
-        }
-        else
-        {
-            if (sym == becomes)
+            if (table[i].kind != variable)
             {
-                getsym();
+                error(12); /* 赋值语句中，赋值号左部标识符应该是变量 */
+                i = 0;
             }
             else
             {
-                error(13); /* 没有检测到赋值符号 */
-            }
-            memcpy(nxtlev, fsys, sizeof(bool) * symnum);
-            expression(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
-            if (i != 0)
-            {
-                /* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
-                gen(sto, lev - table[i].level, table[i].adr);
+                getsym();
+                if (sym == becomes)
+                {
+                    getsym();
+                }
+                else
+                {
+                    error(13); /* 没有检测到赋值符号 */
+                }
+                memcpy(nxtlev, fsys, sizeof(bool) * symnum);
+                expression(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
+                if (i != 0)
+                {
+                    /* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
+                    gen(sto, lev - table[i].level, table[i].adr);
+                }
             }
         }
     }
@@ -1072,10 +1092,10 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                         {
                             error(16); /* 缺少then */
                         }
-                        cx1 = cx;                       /* 保存当前指令地址 */
-                        gen(jpc, 0, 0);                 /* 生成条件跳转指令，跳转地址未知，暂时写0 */
-                        statement(fsys, ptx, lev, pdx); /* 处理then后的语句 */
-                        code[cx1].a = cx;               /* 经statement处理后，cx为then后语句执行完的位置，它正是前面未定的跳转地址，此时进行回填 */
+                        cx1 = cx;                  /* 保存当前指令地址 */
+                        gen(jpc, 0, 0);            /* 生成条件跳转指令，跳转地址未知，暂时写0 */
+                        statement(fsys, ptx, lev); /* 处理then后的语句 */
+                        code[cx1].a = cx;          /* 经statement处理后，cx为then后语句执行完的位置，它正是前面未定的跳转地址，此时进行回填 */
                     }
                     else
                     {
@@ -1086,7 +1106,7 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                             nxtlev[semicolon] = true;
                             nxtlev[endsym] = true; /* 后继符号为分号或end */
 
-                            statement(nxtlev, ptx, lev, pdx); /* 对begin与end之间的语句进行分析处理 */
+                            statement(nxtlev, ptx, lev); /* 对begin与end之间的语句进行分析处理 */
                             /* 如果分析完一句后遇到语句开始符或分号，则循环分析下一句语句 */
                             while (inset(sym, statbegsys) || sym == semicolon)
                             {
@@ -1098,7 +1118,7 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                                 {
                                     error(10); /* 缺少分号 */
                                 }
-                                statement(nxtlev, ptx, lev, pdx);
+                                statement(nxtlev, ptx, lev);
                             }
                             if (sym == endsym)
                             {
@@ -1128,9 +1148,9 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                                 {
                                     error(18); /* 缺少do */
                                 }
-                                statement(fsys, ptx, lev, pdx); /* 循环体 */
-                                gen(jmp, 0, cx1);               /* 生成条件跳转指令，跳转到前面判断条件操作的位置 */
-                                code[cx2].a = cx;               /* 回填跳出循环的地址 */
+                                statement(fsys, ptx, lev); /* 循环体 */
+                                gen(jmp, 0, cx1);          /* 生成条件跳转指令，跳转到前面判断条件操作的位置 */
+                                code[cx2].a = cx;          /* 回填跳出循环的地址 */
                             }
                         }
                     }
