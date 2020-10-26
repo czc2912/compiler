@@ -1051,7 +1051,15 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                         cx1 = cx;                       /* 保存当前指令地址 */
                         gen(jpc, 0, 0);                 /* 生成条件跳转指令，跳转地址未知，暂时写0 */
                         statement(fsys, ptx, lev, pdx); /* 处理then后的语句 */
-                        code[cx1].a = cx;               /* 经statement处理后，cx为then后语句执行完的位置，它正是前面未定的跳转地址，此时进行回填 */
+                        if (sym == endsym)
+                        {
+                            getsym();
+                        }
+                        else
+                        {
+                            error(119);
+                        }
+                        code[cx1].a = cx; /* 经statement处理后，cx为then后语句执行完的位置，它正是前面未定的跳转地址，此时进行回填 */
                     }
                     else
                     {

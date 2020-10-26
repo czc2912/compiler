@@ -1,9 +1,11 @@
 begin
 a:=0;
+b:=10;
 repeat
-begin
-write(a);
-a:=a+1;
-end
+    begin
+    write a;
+    if odd a then write b end;
+    a:=a+1;
+    end
 until a>10
 end.
