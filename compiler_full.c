@@ -21,7 +21,7 @@
 #define true 1
 #define false 0
 
-#define norw 13       /* 保留字个数 */
+#define norw 15       /* 保留字个数 */
 #define txmax 100     /* 符号表容量 */
 #define nmax 14       /* 数字的最大位数 */
 #define al 10         /* 标识符的最大长度 */
@@ -66,6 +66,8 @@ enum symbol
     constsym,
     varsym,
     procsym,
+    repeatsym,
+    untilsym,
 };
 #define symnum 32
 
@@ -295,10 +297,12 @@ void init()
     strcpy(&(word[6][0]), "odd");
     strcpy(&(word[7][0]), "procedure");
     strcpy(&(word[8][0]), "read");
-    strcpy(&(word[9][0]), "then");
-    strcpy(&(word[10][0]), "var");
-    strcpy(&(word[11][0]), "while");
-    strcpy(&(word[12][0]), "write");
+    strcpy(&(word[9][0]), "repeat");
+    strcpy(&(word[10][0]), "then");
+    strcpy(&(word[11][0]), "until");
+    strcpy(&(word[12][0]), "var");
+    strcpy(&(word[13][0]), "while");
+    strcpy(&(word[14][0]), "write");
 
     /* 设置保留字符号 */
     wsym[0] = beginsym;
@@ -310,10 +314,12 @@ void init()
     wsym[6] = oddsym;
     wsym[7] = procsym;
     wsym[8] = readsym;
-    wsym[9] = thensym;
-    wsym[10] = varsym;
-    wsym[11] = whilesym;
-    wsym[12] = writesym;
+    wsym[9] = repeatsym;
+    wsym[10] = thensym;
+    wsym[11] = untilsym;
+    wsym[12] = varsym;
+    wsym[13] = whilesym;
+    wsym[14] = writesym;
 
     /* 设置指令名称 */
     strcpy(&(mnemonic[lit][0]), "lit");
@@ -1101,6 +1107,31 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                                 statement(fsys, ptx, lev, pdx); /* 循环体 */
                                 gen(jmp, 0, cx1);               /* 生成条件跳转指令，跳转到前面判断条件操作的位置 */
                                 code[cx2].a = cx;               /* 回填跳出循环的地址 */
+                            }
+                            else
+                            {
+                                if (sym == repeatsym)
+                                {
+                                    cx1 = cx; /* 保存循环体的位置 */
+                                    getsym();
+                                    statement(fsys, ptx, lev, pdx); /* 循环体 */
+                                    if (sym == untilsym)
+                                    {
+                                        getsym();
+                                    }
+                                    else
+                                    {
+                                        // todo: 出错处理
+                                        error(118); /* 缺少until */
+                                    }
+                                    memcpy(nxtlev, fsys, sizeof(bool) * symnum);
+                                    // nxtlev[dosym] = true;        /* 后继符号为do */
+                                    condition(nxtlev, ptx, lev); /* 调用条件处理 */
+                                    cx2 = cx;
+                                    gen(jpc, 0, cx2 + 2);
+                                    gen(jmp, 0, cx2 + 3);
+                                    gen(jmp, 0, cx1);
+                                }
                             }
                         }
                     }
