@@ -593,64 +593,97 @@ void statement(int *ptx)
     {
         if (sym == readsym) /* 准备按照read语句处理 */
         {
-            getsym();
-            if (sym != lparen)
-            {
-                error(34); /* 格式错误，应是左括号 */
-            }
-            else
-            {
-                do
-                {
-                    getsym();
-                    if (sym == ident)
-                    {
-                        i = position(id, *ptx); /* 查找要读的变量 */
-                    }
-                    else
-                    {
-                        i = 0;
-                    }
+            // getsym();
+            // if (sym != lparen)
+            // {
+            //     error(34); /* 格式错误，应是左括号 */
+            // }
+            // else
+            // {
+            //     do
+            //     {
+            //         getsym();
+            //         if (sym == ident)
+            //         {
+            //             i = position(id, *ptx); /* 查找要读的变量 */
+            //         }
+            //         else
+            //         {
+            //             i = 0;
+            //         }
 
-                    if (i == 0)
-                    {
-                        error(35); /* read语句括号中的标识符应该是声明过的变量 */
-                    }
+            //         if (i == 0)
+            //         {
+            //             error(35); /* read语句括号中的标识符应该是声明过的变量 */
+            //         }
 
-                    getsym();
+            //         getsym();
 
-                } while (sym == comma); /* 一条read语句可读多个变量 */
-            }
-            if (sym != rparen)
-            {
-                error(33); /* 格式错误，应是右括号 */
-            }
-            else
+            //     } while (sym == comma); /* 一条read语句可读多个变量 */
+            // }
+            do
             {
                 getsym();
-            }
+                if (sym == ident)
+                {
+                    i = position(id, *ptx); /* 查找要读的变量 */
+                }
+                else
+                {
+                    i = 0;
+                }
+
+                if (i == 0)
+                {
+                    error(35); /* read语句括号中的标识符应该是声明过的变量 */
+                }
+
+                getsym();
+
+            } while (sym == comma); /* 一条read语句可读多个变量 */
+            // if (sym != rparen)
+            // {
+            //     error(33); /* 格式错误，应是右括号 */
+            // }
+            // else
+            // {
+            //     getsym();
+            // }
         }
         else
         {
             if (sym == writesym) /* 准备按照write语句处理 */
             {
-                getsym();
-                if (sym == lparen)
+                // getsym();
+                // if (sym == lparen)
+                // {
+                //     do
+                //     {
+                //         getsym();
+                //         expression(ptx);    /* 调用表达式处理 */
+                //     } while (sym == comma); /* 一条write可输出多个变量的值 */
+                //     if (sym != rparen)
+                //     {
+                //         error(33); /* 格式错误，应是右括号 */
+                //     }
+                //     else
+                //     {
+                //         getsym();
+                //     }
+                // }
+                do
                 {
-                    do
-                    {
-                        getsym();
-                        expression(ptx);    /* 调用表达式处理 */
-                    } while (sym == comma); /* 一条write可输出多个变量的值 */
-                    if (sym != rparen)
-                    {
-                        error(33); /* 格式错误，应是右括号 */
-                    }
-                    else
-                    {
-                        getsym();
-                    }
-                }
+                    getsym();
+                    expression(ptx);    /* 调用表达式处理 */
+                } while (sym == comma); /* 一条write可输出多个变量的值 */
+                // if (sym != rparen)
+                // {
+                //     error(33); /* 格式错误，应是右括号 */
+                // }
+                // else
+                // {
+                //     getsym();
+                // }
             }
             else
             {

@@ -1,8 +1,10 @@
 const a=10;
 begin
 b:=12;
-write(b);
-write(a);
-write(2*a);
+write b;
+read b;
+write b;
+write a;
+write 2*a;
 end.
 ===Parsing success!===
