@@ -955,77 +955,45 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
     {
         if (sym == readsym) /* 准备按照read语句处理 */
         {
-            getsym();
-            if (sym != lparen)
-            {
-                error(34); /* 格式错误，应是左括号 */
-            }
-            else
-            {
-                do
-                {
-                    getsym();
-                    if (sym == ident)
-                    {
-                        i = position(id, *ptx); /* 查找要读的变量 */
-                    }
-                    else
-                    {
-                        i = 0;
-                    }
-
-                    if (i == 0)
-                    {
-                        error(35); /* read语句括号中的标识符应该是声明过的变量 */
-                    }
-                    else
-                    {
-                        gen(opr, 0, 16);                              /* 生成输入指令，读取值到栈顶 */
-                        gen(sto, lev - table[i].level, table[i].adr); /* 将栈顶内容送入变量单元中 */
-                    }
-                    getsym();
-
-                } while (sym == comma); /* 一条read语句可读多个变量 */
-            }
-            if (sym != rparen)
-            {
-                error(33);                /* 格式错误，应是右括号 */
-                while (!inset(sym, fsys)) /* 出错补救，直到遇到上层函数的后继符号 */
-                {
-                    getsym();
-                }
-            }
-            else
+            do
             {
                 getsym();
-            }
+                if (sym == ident)
+                {
+                    i = position(id, *ptx); /* 查找要读的变量 */
+                }
+                else
+                {
+                    i = 0;
+                }
+
+                if (i == 0)
+                {
+                    error(35); /* read语句括号中的标识符应该是声明过的变量 */
+                }
+                else
+                {
+                    gen(opr, 0, 16);                              /* 生成输入指令，读取值到栈顶 */
+                    gen(sto, lev - table[i].level, table[i].adr); /* 将栈顶内容送入变量单元中 */
+                }
+                getsym();
+
+            } while (sym == comma); /* 一条read语句可读多个变量 */
         }
         else
         {
             if (sym == writesym) /* 准备按照write语句处理 */
             {
-                getsym();
-                if (sym == lparen)
+                do
                 {
-                    do
-                    {
-                        getsym();
-                        memcpy(nxtlev, fsys, sizeof(bool) * symnum);
-                        nxtlev[rparen] = true;
-                        nxtlev[comma] = true;
-                        expression(nxtlev, ptx, lev); /* 调用表达式处理 */
-                        gen(opr, 0, 14);              /* 生成输出指令，输出栈顶的值 */
-                        gen(opr, 0, 15);              /* 生成换行指令 */
-                    } while (sym == comma);           /* 一条write可输出多个变量的值 */
-                    if (sym != rparen)
-                    {
-                        error(33); /* 格式错误，应是右括号 */
-                    }
-                    else
-                    {
-                        getsym();
-                    }
-                }
+                    getsym();
+                    memcpy(nxtlev, fsys, sizeof(bool) * symnum);
+                    nxtlev[rparen] = true;
+                    nxtlev[comma] = true;
+                    expression(nxtlev, ptx, lev); /* 调用表达式处理 */
+                    gen(opr, 0, 14);              /* 生成输出指令，输出栈顶的值 */
+                    gen(opr, 0, 15);              /* 生成换行指令 */
+                } while (sym == comma);           /* 一条write可输出多个变量的值 */
             }
             else
             {

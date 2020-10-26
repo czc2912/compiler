@@ -4,12 +4,16 @@ begin
  a:=3;
  b:=5;
  x:=a+b;
- write(x);
+ write x;
 end;
 begin
+val:=0;
+read val;
+write val;
 a:=1;
-write(a);
+a:=val;
+write a;
 call plus;
-write(a);
+write a;
 end.
 
