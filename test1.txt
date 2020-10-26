@@ -8,4 +8,7 @@ write a;
 write 2*a;
 if odd b then b := 1;
 write b;
+repeat b:=b+1 until b>20;
+// sdhfui
+write b;
 end.

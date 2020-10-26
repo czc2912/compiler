@@ -322,6 +322,7 @@ void getsym()
     }
     else
     {
+
         if (ch >= '0' && ch <= '9') /* 当前的单词是数字 */
         {
             k = 0;
@@ -341,6 +342,7 @@ void getsym()
         }
         else
         {
+
             if (ch == ':') /* 检测赋值符号 */
             {
                 getch();
@@ -386,10 +388,21 @@ void getsym()
                     }
                     else
                     {
-                        sym = ssym[ch]; /* 当符号不满足上述条件时，全部按照单字符符号处理 */
-                        if (sym != period)
+                        if (ch == '/' && cc < ll && line[cc] == '/')
                         {
-                            getch();
+                            /* 跳过注释行 */
+                            while (cc < ll)
+                            {
+                                getch();
+                            }
+                        }
+                        else
+                        {
+                            sym = ssym[ch]; /* 当符号不满足上述条件时，全部按照单字符符号处理 */
+                            if (sym != period)
+                            {
+                                getch();
+                            }
                         }
                     }
                 }
