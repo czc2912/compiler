@@ -1,15 +1,16 @@
-const a=10;
+var x
+procedure plus;
+         ^5
+var a,b;
 begin
-b:=12;
-write b;
-read b;
-write b;
-write a;
-write 2*a;
-if odd b then b := 1;
-write b;
-repeat b:=b+1 until b>20;
-// sdhfui
-write b;
-end.
-===Parsing success!===
+ a=3;
+   ^13
+   ^24
+ c:=7;
+  ^11
+  ^19
+ x:=a+b;
+end;
+call plvs.         ^11
+
+===6 errors in pl/0 program!===

@@ -1,0 +1,9 @@
+var x
+procedure plus;
+var a,b;
+begin
+ a=3;
+ c:=7;
+ x:=a+b;
+end;
+call plvs.
