@@ -1,10 +1,15 @@
-const a=10;
+const p=100;
+procedure plus;
 begin
-b:=12;
-b:=1;
-c:=1234;
+ a:=3;
+ b:=5;
+ x:=a+b;
+ write(x);
+end;
+begin
+a:=1;
 write(a);
-write(b);
-write(c);
-write(b)
+call plus;
+write(a);
 end.
+

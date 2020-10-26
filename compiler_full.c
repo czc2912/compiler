@@ -199,13 +199,15 @@ int main()
         exit(1);
     }
 
-    printf("List object codes?(Y/N)"); /* 是否输出虚拟机代码 */
-    scanf("%s", fname);
-    listswitch = (fname[0] == 'y' || fname[0] == 'Y');
+    // printf("List object codes?(Y/N)"); /* 是否输出虚拟机代码 */
+    // scanf("%s", fname);
+    // listswitch = (fname[0] == 'y' || fname[0] == 'Y');
+    listswitch = true;
 
-    printf("List symbol table?(Y/N)"); /* 是否输出符号表 */
-    scanf("%s", fname);
-    tableswitch = (fname[0] == 'y' || fname[0] == 'Y');
+    // printf("List symbol table?(Y/N)"); /* 是否输出符号表 */
+    // scanf("%s", fname);
+    // tableswitch = (fname[0] == 'y' || fname[0] == 'Y');
+    tableswitch = true;
 
     init(); /* 初始化 */
     err = 0;

@@ -1,2 +1,6 @@
-    1 const a val=10
+    1 const p val=100
+    2 proc  plus lev=0 addr=2 size=3
+
+    1 const p val=100
+    2 proc  plus lev=0 addr=2 size=3
 

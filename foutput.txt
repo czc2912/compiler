@@ -1,11 +1,16 @@
-0 const a=10;
+0 const p=100;
+1 procedure plus;
 1 begin
-2 b:=12;
-4 b:=1;
-6 c:=1234;
-8 write(a);
-11 write(b);
-14 write(c);
-17 write(b)
-20 end.
+3  a:=3;
+5  b:=5;
+7  x:=a+b;
+11  write(x);
+14 end;
+15 begin
+16 a:=1;
+18 write(a);
+21 call plus;
+22 write(a);
+25 end.
+
 ===Parsing success!===
