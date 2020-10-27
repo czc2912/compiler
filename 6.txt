@@ -1,11 +1,14 @@
+// repeat+if
 begin
     a:=0;
+    // testdosgj
     if a = 0 then 
         begin
         a:=a+1;
         write a;
         end
     end;
+    //sdjgio
     write a;
     if a = 0 then 
         begin

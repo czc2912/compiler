@@ -566,10 +566,20 @@ void getsym()
                     }
                     else
                     {
-                        sym = ssym[ch]; /* 当符号不满足上述条件时，全部按照单字符符号处理 */
-                        if (sym != period)
+                        if (ch == '/' && cc < ll && line[cc] == '/')
                         {
+                            /* 跳过注释行 */
+                            cc = ll;
                             getch();
+                            getsym();
+                        }
+                        else
+                        {
+                            sym = ssym[ch]; /* 当符号不满足上述条件时，全部按照单字符符号处理 */
+                            if (sym != period)
+                            {
+                                getch();
+                            }
                         }
                     }
                 }
