@@ -694,6 +694,28 @@ void block(int lev, int tx, bool *fsys)
                 }
             } while (sym == ident);
         }
+        if (sym == varsym) /* 遇到变量声明符号，开始处理变量声明 */
+        {
+            getsym();
+
+            do
+            {
+                vardeclaration(&tx, lev, &dx);
+                while (sym == comma)
+                {
+                    getsym();
+                    vardeclaration(&tx, lev, &dx);
+                }
+                if (sym == semicolon)
+                {
+                    getsym();
+                }
+                else
+                {
+                    error(5); /* 漏掉了分号 */
+                }
+            } while (sym == ident);
+        }
 
         while (sym == procsym) /* 遇到过程声明符号，开始处理过程声明 */
         {
@@ -957,17 +979,47 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
             if (sym == becomes)
             {
                 getsym();
+                memcpy(nxtlev, fsys, sizeof(bool) * symnum);
+                expression(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
+                if (i != 0)
+                {
+                    /* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
+                    gen(sto, lev - table[i].level, table[i].adr);
+                }
             }
             else
             {
-                error(13); /* 没有检测到赋值符号 */
-            }
-            memcpy(nxtlev, fsys, sizeof(bool) * symnum);
-            expression(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
-            if (i != 0)
-            {
-                /* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
-                gen(sto, lev - table[i].level, table[i].adr);
+                if (sym == plus)
+                {
+                    if (ch == '+')
+                    {
+                        gen(lod, lev - table[i].level, table[i].adr);
+                        gen(lit, 0, 1);
+                        gen(opr, 0, 2);
+                        gen(sto, lev - table[i].level, table[i].adr);
+                    }
+                    getch();
+                    getsym();
+                }
+                else
+                {
+                    if (sym == minus)
+                    {
+                        if (ch == '-')
+                        {
+                            gen(lod, lev - table[i].level, table[i].adr);
+                            gen(lit, 0, 1);
+                            gen(opr, 0, 3);
+                            gen(sto, lev - table[i].level, table[i].adr);
+                        }
+                        getch();
+                        getsym();
+                    }
+                    else
+                    {
+                        error(13); /* 没有检测到赋值符号或++或-- */
+                    }
+                }
             }
         }
     }

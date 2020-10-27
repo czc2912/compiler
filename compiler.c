@@ -439,24 +439,24 @@ void block(int tx)
         }
     }
 
-    // if (sym == varsym) /* 遇到变量声明符号，开始处理变量声明 */
-    // {
-    //     getsym();
-    //     vardeclaration(&tx);
-    //     while (sym == comma)
-    //     {
-    //         getsym();
-    //         vardeclaration(&tx);
-    //     }
-    //     if (sym == semicolon)
-    //     {
-    //         getsym();
-    //     }
-    //     else
-    //     {
-    //         error(5); /* 漏掉了分号 */
-    //     }
-    // }
+    if (sym == varsym) /* 遇到变量声明符号，开始处理变量声明 */
+    {
+        getsym();
+        vardeclaration(&tx);
+        while (sym == comma)
+        {
+            getsym();
+            vardeclaration(&tx);
+        }
+        if (sym == semicolon)
+        {
+            getsym();
+        }
+        else
+        {
+            error(5); /* 漏掉了分号 */
+        }
+    }
 
     while (sym == procsym) /* 遇到过程声明符号，开始处理过程声明 */
     {

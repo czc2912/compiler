@@ -1,17 +1,16 @@
-0 begin
-2 a:=1;
-4 write a;
-7 a:=a+1;
-11 write a;
-14 a:=a*2;
-18 write a;
-21 a:=a/4;
-25 write a;
-28 a:=8;
-30 write a;
-33 a:=a%5;
-37 write a;
-40 a:=a^2;
-44 write a
-45 end.
+0 // 测试过程中++ -- 是否正确
+0 var a;
+1 procedure test;
+1 begin
+3 write a;
+6 a++;
+10 end;
+11 begin
+12 a:=0;
+14 call test;
+15 write a;
+18 a++;
+22 call test;
+23 write a;
+26 end.
 ===Parsing success!===

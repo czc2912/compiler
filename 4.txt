@@ -1,3 +1,4 @@
+// 稍微复杂一点的过程和read write
 const p=100;
 procedure plus;
 begin

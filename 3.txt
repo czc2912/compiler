@@ -1,6 +1,5 @@
-var x;
+// 简单测试过程是否可用
 procedure plus;
-var a,b;
 begin
  a:=3;
  b:=5;
