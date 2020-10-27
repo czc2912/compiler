@@ -11,4 +11,6 @@ a:=8;
 write a;
 a:=a%5;
 write a;
+a:=a^2;
+write a
 end.

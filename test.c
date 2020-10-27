@@ -4,6 +4,6 @@
 int main()
 {
 
-    printf("xyxy");
+    printf("%d", 8 ^ 2);
     return 0;
 }

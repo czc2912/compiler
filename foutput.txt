@@ -11,5 +11,7 @@
 30 write a;
 33 a:=a%5;
 37 write a;
-40 end.
+40 a:=a^2;
+44 write a
+45 end.
 ===Parsing success!===
