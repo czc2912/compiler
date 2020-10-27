@@ -1,0 +1,14 @@
+begin
+a:=1;
+write a;
+a:=a+1;
+write a;
+a:=a*2;
+write a;
+a:=a/4;
+write a;
+a:=8;
+write a;
+a:=a%5;
+write a;
+end.

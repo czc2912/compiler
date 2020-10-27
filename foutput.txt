@@ -1,22 +1,15 @@
-0 //  测试repeat 和 if
 0 begin
-2 a:=0;
-4 b:=10;
-6 repeat
-6     begin
-6     write a;
-9     // test if
-9     if odd a then write b end;
-15     a:=a+1;
-19     end
-19 until a>10;
-25 b:=24;
-27 // 再测试一下 while
-27 while b<30 do
-31 begin
-31     write b;
-34     b:=b+1;
-38 end
-38 end.
-
+2 a:=1;
+4 write a;
+7 a:=a+1;
+11 write a;
+14 a:=a*2;
+18 write a;
+21 a:=a/4;
+25 write a;
+28 a:=8;
+30 write a;
+33 a:=a%5;
+37 write a;
+40 end.
 ===Parsing success!===

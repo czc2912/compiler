@@ -40,6 +40,7 @@ enum symbol
     plus,
     minus,
     times,
+    mod,
     slash,
     oddsym,
     eql,
@@ -279,6 +280,7 @@ void init()
     ssym['-'] = minus;
     ssym['*'] = times;
     ssym['/'] = slash;
+    ssym['%'] = mod;
     ssym['('] = lparen;
     ssym[')'] = rparen;
     ssym['='] = eql;
@@ -1219,8 +1221,10 @@ void term(bool *fsys, int *ptx, int lev)
     memcpy(nxtlev, fsys, sizeof(bool) * symnum);
     nxtlev[times] = true;
     nxtlev[slash] = true;
+    nxtlev[mod] = true;
     factor(nxtlev, ptx, lev); /* 处理因子 */
-    while (sym == times || sym == slash)
+    // todo: 取模
+    while (sym == times || sym == slash || sym == mod)
     {
         mulop = sym;
         getsym();
@@ -1231,7 +1235,17 @@ void term(bool *fsys, int *ptx, int lev)
         }
         else
         {
-            gen(opr, 0, 5); /* 生成除法指令 */
+            if (mulop == slash)
+            {
+                gen(opr, 0, 5); /* 生成除法指令 */
+            }
+            else
+            {
+                if (mulop == mod)
+                {
+                    gen(opr, 0, 17); /* 生成取模指令 */
+                }
+            }
         }
     }
 }
@@ -1463,6 +1477,10 @@ void interpret()
                 fprintf(fresult, "?");
                 scanf("%d", &(s[t]));
                 fprintf(fresult, "%d\n", s[t]);
+                break;
+            case 17: /* 次栈顶项取模栈顶项 */
+                t = t - 1;
+                s[t] = s[t] % s[t + 1];
                 break;
             }
             break;

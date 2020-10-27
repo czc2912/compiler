@@ -1,0 +1,7 @@
+// 测试常量
+const a=1;
+begin
+write a;
+// a:=2;
+write a;
+end.
