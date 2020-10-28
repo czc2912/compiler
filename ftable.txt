@@ -1,5 +1,1 @@
-    1 const a val=0
-    2 const b val=10
-    3 const c val=11
-    4 var   d lev=0 addr=3
 

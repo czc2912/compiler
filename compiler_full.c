@@ -81,7 +81,7 @@ enum symbol
     exitsym,
     breaksym,
 };
-#define symnum 32
+#define symnum 48
 
 /* 符号表中的类型 */
 enum object
@@ -1272,14 +1272,15 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                                 {
                                     cx1 = cx; /* 保存循环体的位置 */
                                     getsym();
-                                    statement(fsys, ptx, lev, pdx); /* 循环体 */
+                                    memcpy(nxtlev, fsys, sizeof(bool) * symnum);
+                                    nxtlev[untilsym] = true;          /* 后继符号为until */
+                                    statement(nxtlev, ptx, lev, pdx); /* 循环体 */
                                     if (sym == untilsym)
                                     {
                                         getsym();
                                     }
                                     else
                                     {
-                                        // todo: 出错处理
                                         error(118); /* 缺少until */
                                     }
                                     memcpy(nxtlev, fsys, sizeof(bool) * symnum);
@@ -1303,7 +1304,6 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                                         }
                                         else
                                         {
-                                            // todo: 出错处理
                                             error(120); /* 缺少while */
                                         }
                                         memcpy(nxtlev, fsys, sizeof(bool) * symnum);
@@ -1526,6 +1526,8 @@ void condition(bool *fsys, int *ptx, int lev)
             nxtlev[leq] = true;
             nxtlev[gtr] = true;
             nxtlev[geq] = true;
+            nxtlev[andsym] = true;
+            nxtlev[orsym] = true;
             expression(nxtlev, ptx, lev);
             if (sym != eql && sym != neq && sym != lss && sym != leq && sym != gtr && sym != geq && sym != andsym && sym != orsym)
             {
@@ -1561,6 +1563,8 @@ void condition(bool *fsys, int *ptx, int lev)
                     break;
                 case orsym:
                     gen(opr, 0, 20);
+                    break;
+                default:
                     break;
                 }
             }

@@ -1,15 +1,16 @@
-0 // 测试boolean
-0 const a=false, b=10;
-1 const c=11;
-1 var d;
-1 begin
-2 write a+b;
-7 write b;
-10 // write c;
-10 if not a or 1 then write 99 end
-**           ^16
-**           ^119
-**           ^17
-**           ^9
+0 //  测试repeat 和 if
+0 begin
+2 a:=0;
+4 b:=10;
+6 repeat
+6     begin
+6     write a;
+9     // test if
+9     if odd a then write b end;
+15     a:=a+1;
+19     end
+19 until a>10;
+25 
+25 end.
 
-4 errors in pl/0 program!
+===Parsing success!===

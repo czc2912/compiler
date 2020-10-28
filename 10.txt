@@ -6,5 +6,5 @@ begin
 write a+b;
 write b;
 // write c;
-if not a or 1 then write 99 end
+if a or b then write 99 end
 end.
