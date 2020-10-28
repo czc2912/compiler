@@ -3,17 +3,16 @@
 1 begin
 3  a:=3;
 5  b:=5;
-7  x:=a+b;
-11  write(x);
+7  x:=a+b;/* djsglkj
+11  djsglkj
+11  dsgjoi
+11  */write(x);
 14  do 
 14  begin
 14  write a;
 17  a++;
 21  end
-21  //while a<10
-21 end;
-**   ^120
-**   ^24
-**   ^20
-24 call plus.
-3 errors in pl/0 program!
+21  while a<10
+23 end;
+27 call plus.
+===Parsing success!===

@@ -3,8 +3,10 @@ procedure plus;
 begin
  a:=3;
  b:=5;
- x:=a+b;
- write(x);
+ x:=a+b;/* djsglkj
+ djsglkj
+ dsgjoi
+ */write(x);
  do 
  begin
  write a;
