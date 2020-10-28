@@ -1,4 +1,5 @@
-    1 proc  plus lev=0 addr=2 size=3
-
-    1 proc  plus lev=0 addr=2 size=3
+    1 const a val=0
+    2 const b val=10
+    3 const c val=11
+    4 var   d lev=0 addr=3
 

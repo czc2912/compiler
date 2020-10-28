@@ -21,7 +21,7 @@
 #define true 1
 #define false 0
 
-#define norw 15       /* 保留字个数 */
+#define norw 25       /* 保留字个数 */
 #define txmax 100     /* 符号表容量 */
 #define nmax 14       /* 数字的最大位数 */
 #define al 10         /* 标识符的最大长度 */
@@ -70,6 +70,16 @@ enum symbol
     procsym,
     repeatsym,
     untilsym,
+    truesym,
+    falsesym,
+    andsym,
+    orsym,
+    notsym,
+    forsym,
+    casesym,
+    continuesym,
+    exitsym,
+    breaksym,
 };
 #define symnum 32
 
@@ -131,6 +141,7 @@ struct tablestruct
     int level;        /* 所处层，仅const不使用 */
     int adr;          /* 地址，仅const不使用 */
     int size;         /* 需要分配的数据区空间, 仅procedure使用 */
+    int isBoolean;    /* 是否是bool类型，const或var使用 */
 };
 
 struct tablestruct table[txmax]; /* 符号表 */
@@ -165,7 +176,7 @@ void listall();
 void vardeclaration(int *ptx, int lev, int *pdx);
 void constdeclaration(int *ptx, int lev, int *pdx);
 int position(char *idt, int tx);
-void enter(enum object k, int *ptx, int lev, int *pdx);
+void enter(enum object k, int *ptx, int lev, int *pdx, int isBoolean);
 int base(int l, int *s, int b);
 
 /* 主程序开始 */
@@ -292,38 +303,58 @@ void init()
     ssym[';'] = semicolon;
 
     /* 设置保留字名字,按照字母顺序，便于二分查找 */
-    strcpy(&(word[0][0]), "begin");
-    strcpy(&(word[1][0]), "call");
-    strcpy(&(word[2][0]), "const");
-    strcpy(&(word[3][0]), "do");
-    strcpy(&(word[4][0]), "end");
-    strcpy(&(word[5][0]), "if");
-    strcpy(&(word[6][0]), "odd");
-    strcpy(&(word[7][0]), "procedure");
-    strcpy(&(word[8][0]), "read");
-    strcpy(&(word[9][0]), "repeat");
-    strcpy(&(word[10][0]), "then");
-    strcpy(&(word[11][0]), "until");
-    strcpy(&(word[12][0]), "var");
-    strcpy(&(word[13][0]), "while");
-    strcpy(&(word[14][0]), "write");
+    strcpy(&(word[0][0]), "and");
+    strcpy(&(word[1][0]), "begin");
+    strcpy(&(word[2][0]), "break");
+    strcpy(&(word[3][0]), "call");
+    strcpy(&(word[4][0]), "case");
+    strcpy(&(word[5][0]), "const");
+    strcpy(&(word[6][0]), "continue");
+    strcpy(&(word[7][0]), "do");
+    strcpy(&(word[8][0]), "end");
+    strcpy(&(word[9][0]), "exit");
+    strcpy(&(word[10][0]), "false");
+    strcpy(&(word[11][0]), "for");
+    strcpy(&(word[12][0]), "if");
+    strcpy(&(word[13][0]), "not");
+    strcpy(&(word[14][0]), "odd");
+    strcpy(&(word[15][0]), "or");
+    strcpy(&(word[16][0]), "procedure");
+    strcpy(&(word[17][0]), "read");
+    strcpy(&(word[18][0]), "repeat");
+    strcpy(&(word[19][0]), "then");
+    strcpy(&(word[20][0]), "true");
+    strcpy(&(word[21][0]), "until");
+    strcpy(&(word[22][0]), "var");
+    strcpy(&(word[23][0]), "while");
+    strcpy(&(word[24][0]), "write");
 
     /* 设置保留字符号 */
-    wsym[0] = beginsym;
-    wsym[1] = callsym;
-    wsym[2] = constsym;
-    wsym[3] = dosym;
-    wsym[4] = endsym;
-    wsym[5] = ifsym;
-    wsym[6] = oddsym;
-    wsym[7] = procsym;
-    wsym[8] = readsym;
-    wsym[9] = repeatsym;
-    wsym[10] = thensym;
-    wsym[11] = untilsym;
-    wsym[12] = varsym;
-    wsym[13] = whilesym;
-    wsym[14] = writesym;
+    wsym[0] = andsym;
+    wsym[1] = beginsym;
+    wsym[2] = breaksym;
+    wsym[3] = callsym;
+    wsym[4] = casesym;
+    wsym[5] = constsym;
+    wsym[6] = continuesym;
+    wsym[7] = dosym;
+    wsym[8] = endsym;
+    wsym[9] = exitsym;
+    wsym[10] = falsesym;
+    wsym[11] = forsym;
+    wsym[12] = ifsym;
+    wsym[13] = notsym;
+    wsym[14] = oddsym;
+    wsym[15] = orsym;
+    wsym[16] = procsym;
+    wsym[17] = readsym;
+    wsym[18] = repeatsym;
+    wsym[19] = thensym;
+    wsym[20] = truesym;
+    wsym[21] = untilsym;
+    wsym[22] = varsym;
+    wsym[23] = whilesym;
+    wsym[24] = writesym;
 
     /* 设置指令名称 */
     strcpy(&(mnemonic[lit][0]), "lit");
@@ -688,7 +719,6 @@ void block(int lev, int tx, bool *fsys)
         if (sym == constsym) /* 遇到常量声明符号，开始处理常量声明 */
         {
             getsym();
-
             do
             {
                 constdeclaration(&tx, lev, &dx); /* dx的值会被constdeclaration改变，使用指针 */
@@ -736,7 +766,7 @@ void block(int lev, int tx, bool *fsys)
 
             if (sym == ident)
             {
-                enter(procedure, &tx, lev, &dx); /* 填写符号表 */
+                enter(procedure, &tx, lev, &dx, false); /* 填写符号表 */
                 getsym();
             }
             else
@@ -772,6 +802,8 @@ void block(int lev, int tx, bool *fsys)
         }
         memcpy(nxtlev, statbegsys, sizeof(bool) * symnum);
         nxtlev[ident] = true;
+        nxtlev[constsym] = true;
+        nxtlev[varsym] = true;
         test(nxtlev, declbegsys, 7);
     } while (inset(sym, declbegsys)); /* 直到没有声明符号 */
 
@@ -832,7 +864,7 @@ void block(int lev, int tx, bool *fsys)
  * pdx:    dx为当前应分配的变量的相对地址，分配后要增加1
  * 
  */
-void enter(enum object k, int *ptx, int lev, int *pdx)
+void enter(enum object k, int *ptx, int lev, int *pdx, int isBoolean)
 {
     (*ptx)++;
     strcpy(table[(*ptx)].name, id); /* 符号表的name域记录标识符的名字 */
@@ -846,10 +878,26 @@ void enter(enum object k, int *ptx, int lev, int *pdx)
             num = 0;
         }
         table[(*ptx)].val = num; /* 登记常数的值 */
+        if (isBoolean)
+        {
+            table[(*ptx)].isBoolean = 1;
+        }
+        else
+        {
+            table[(*ptx)].isBoolean = 0;
+        }
         break;
     case variable: /* 变量 */
         table[(*ptx)].level = lev;
         table[(*ptx)].adr = (*pdx);
+        if (isBoolean)
+        {
+            table[(*ptx)].isBoolean = 1;
+        }
+        else
+        {
+            table[(*ptx)].isBoolean = 0;
+        }
         (*pdx)++;
         break;
     case procedure: /* 过程 */
@@ -885,6 +933,8 @@ void constdeclaration(int *ptx, int lev, int *pdx)
     if (sym == ident)
     {
         getsym();
+        char curID[al + 1];
+        strcpy(curID, id);
         if (sym == eql || sym == becomes)
         {
             if (sym == becomes)
@@ -892,14 +942,35 @@ void constdeclaration(int *ptx, int lev, int *pdx)
                 error(1); /* 把=写成了:= */
             }
             getsym();
+            printf("918%d\n", sym);
             if (sym == number)
             {
-                enter(constant, ptx, lev, pdx);
+                enter(constant, ptx, lev, pdx, false);
                 getsym();
             }
             else
             {
-                error(2); /* 常量声明中的=后应是数字 */
+                if (sym == truesym)
+                {
+                    num = 1;
+                    strcpy(id, curID);
+                    enter(constant, ptx, lev, pdx, true);
+                    getsym();
+                }
+                else
+                {
+                    if (sym == falsesym)
+                    {
+                        num = 0;
+                        strcpy(id, curID);
+                        enter(constant, ptx, lev, pdx, true);
+                        getsym();
+                    }
+                    else
+                    {
+                        error(2); /* 常量声明中的=后应是数字或bool */
+                    }
+                }
             }
         }
         else
@@ -920,7 +991,7 @@ void vardeclaration(int *ptx, int lev, int *pdx)
 {
     if (sym == ident)
     {
-        enter(variable, ptx, lev, pdx); // 填写符号表
+        enter(variable, ptx, lev, pdx, false); // 填写符号表
         getsym();
     }
     else
@@ -1438,44 +1509,60 @@ void condition(bool *fsys, int *ptx, int lev)
     }
     else
     {
-        /* 逻辑表达式处理 */
-        memcpy(nxtlev, fsys, sizeof(bool) * symnum);
-        nxtlev[eql] = true;
-        nxtlev[neq] = true;
-        nxtlev[lss] = true;
-        nxtlev[leq] = true;
-        nxtlev[gtr] = true;
-        nxtlev[geq] = true;
-        expression(nxtlev, ptx, lev);
-        if (sym != eql && sym != neq && sym != lss && sym != leq && sym != gtr && sym != geq)
+        if (sym == notsym)
         {
-            error(20); /* 应该为关系运算符 */
+            getsym();
+            expression(fsys, ptx, lev);
+            gen(lit, 0, 0);
+            gen(opr, 0, 8); /* 判断不等 */
         }
         else
         {
-            relop = sym;
-            getsym();
-            expression(fsys, ptx, lev);
-            switch (relop)
+            /* 逻辑表达式处理 */
+            memcpy(nxtlev, fsys, sizeof(bool) * symnum);
+            nxtlev[eql] = true;
+            nxtlev[neq] = true;
+            nxtlev[lss] = true;
+            nxtlev[leq] = true;
+            nxtlev[gtr] = true;
+            nxtlev[geq] = true;
+            expression(nxtlev, ptx, lev);
+            if (sym != eql && sym != neq && sym != lss && sym != leq && sym != gtr && sym != geq && sym != andsym && sym != orsym)
             {
-            case eql:
-                gen(opr, 0, 8);
-                break;
-            case neq:
-                gen(opr, 0, 9);
-                break;
-            case lss:
-                gen(opr, 0, 10);
-                break;
-            case geq:
-                gen(opr, 0, 11);
-                break;
-            case gtr:
-                gen(opr, 0, 12);
-                break;
-            case leq:
-                gen(opr, 0, 13);
-                break;
+                error(20); /* 应该为关系运算符 */
+            }
+            else
+            {
+                relop = sym;
+                getsym();
+                expression(fsys, ptx, lev);
+                switch (relop)
+                {
+                case eql:
+                    gen(opr, 0, 8);
+                    break;
+                case neq:
+                    gen(opr, 0, 9);
+                    break;
+                case lss:
+                    gen(opr, 0, 10);
+                    break;
+                case geq:
+                    gen(opr, 0, 11);
+                    break;
+                case gtr:
+                    gen(opr, 0, 12);
+                    break;
+                case leq:
+                    gen(opr, 0, 13);
+                    break;
+                case andsym:
+                    gen(opr, 0, 19);
+                    break;
+                case orsym:
+                    gen(opr, 0, 20);
+                    break;
+                }
             }
         }
     }
@@ -1585,6 +1672,14 @@ void interpret()
             case 18: /* 次栈顶项异或栈顶项 */
                 t = t - 1;
                 s[t] = s[t] ^ s[t + 1];
+                break;
+            case 19: /* 次栈顶项and栈顶项 */
+                t = t - 1;
+                s[t] = s[t] && s[t + 1];
+                break;
+            case 20: /* 次栈顶项or栈顶项 */
+                t = t - 1;
+                s[t] = s[t] || s[t + 1];
                 break;
             }
             break;
