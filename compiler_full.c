@@ -1206,6 +1206,31 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                                     gen(jmp, 0, cx2 + 3);
                                     gen(jmp, 0, cx1);
                                 }
+                                else
+                                {
+                                    if (sym == dosym)
+                                    {
+                                        cx1 = cx; /* 保存循环体的位置 */
+                                        getsym();
+                                        statement(fsys, ptx, lev, pdx); /* 循环体 */
+                                        if (sym == whilesym)
+                                        {
+                                            getsym();
+                                        }
+                                        else
+                                        {
+                                            // todo: 出错处理
+                                            error(120); /* 缺少while */
+                                        }
+                                        memcpy(nxtlev, fsys, sizeof(bool) * symnum);
+                                        // nxtlev[dosym] = true;        /* 后继符号为do */
+                                        condition(nxtlev, ptx, lev); /* 调用条件处理 */
+                                        cx2 = cx;
+                                        gen(jpc, 0, cx2 + 2);
+                                        // gen(jmp, 0, cx2 + 3);
+                                        gen(jmp, 0, cx1);
+                                    }
+                                }
                             }
                         }
                     }

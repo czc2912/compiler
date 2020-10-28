@@ -1,16 +1,19 @@
-0 // 测试过程中++ -- 是否正确
-0 var a;
-1 procedure test;
+0 // 简单测试过程是否可用
+0 procedure plus;
 1 begin
-3 write a;
-6 a++;
-10 end;
-11 begin
-12 a:=0;
-14 call test;
-15 write a;
-18 a++;
-22 call test;
-23 write a;
-26 end.
-===Parsing success!===
+3  a:=3;
+5  b:=5;
+7  x:=a+b;
+11  write(x);
+14  do 
+14  begin
+14  write a;
+17  a++;
+21  end
+21  //while a<10
+21 end;
+**   ^120
+**   ^24
+**   ^20
+24 call plus.
+3 errors in pl/0 program!

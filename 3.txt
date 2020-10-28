@@ -5,5 +5,11 @@ begin
  b:=5;
  x:=a+b;
  write(x);
+ do 
+ begin
+ write a;
+ a++;
+ end
+ while a<10
 end;
 call plus.
