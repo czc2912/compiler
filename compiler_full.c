@@ -34,7 +34,7 @@
 /* 符号 */
 enum symbol
 {
-    nul,
+    nul, //0
     ident,
     number,
     plus,
@@ -44,7 +44,7 @@ enum symbol
     xor,
     slash,
     oddsym,
-    eql,
+    eql, //10
     neq,
     lss,
     leq,
@@ -53,7 +53,7 @@ enum symbol
     lparen,
     rparen,
     comma,
-    semicolon,
+    semicolon, //19
     period,
     becomes,
     beginsym,
@@ -64,7 +64,7 @@ enum symbol
     writesym,
     readsym,
     dosym,
-    callsym,
+    callsym, //30
     constsym,
     varsym,
     procsym,
@@ -74,7 +74,7 @@ enum symbol
     falsesym,
     andsym,
     orsym,
-    notsym,
+    notsym, //40
     forsym,
     casesym,
     continuesym,
@@ -1037,7 +1037,7 @@ void listall()
  */
 void statement(bool *fsys, int *ptx, int lev, int *pdx)
 {
-    int i, cx1, cx2;
+    int i, cx1, cx2, cx3, cx4;
     bool nxtlev[symnum];
 
     if (sym == ident) /* 准备按照赋值语句处理 */
@@ -1313,6 +1313,63 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                                         gen(jpc, 0, cx2 + 2);
                                         // gen(jmp, 0, cx2 + 3);
                                         gen(jmp, 0, cx1);
+                                    }
+                                    else
+                                    {
+                                        if (sym == forsym)
+                                        {
+                                            getsym();
+                                            if (sym == lparen)
+                                            {
+                                                getsym();
+                                                memcpy(nxtlev, fsys, sizeof(bool) * symnum);
+                                                nxtlev[semicolon] = true; /* 后继符号为分号 */
+                                                statement(nxtlev, ptx, lev, pdx);
+                                                cx1 = cx;
+                                                if (sym == semicolon)
+                                                {
+                                                    getsym(); //分号
+                                                }
+                                                else
+                                                {
+                                                    error(124); //for语句缺少分号
+                                                }
+                                                condition(nxtlev, ptx, lev); /* 调用条件处理 */
+                                                if (sym == semicolon)
+                                                {
+                                                    getsym(); //分号
+                                                }
+                                                else
+                                                {
+                                                    error(124); //for语句缺少分号
+                                                }
+                                                cx2 = cx;       /* 保存循环体的结束的下一个位置 */
+                                                gen(jpc, 0, 0); /* 生成条件跳转，但跳出循环的地址未知，标记为0等待回填 */
+                                                cx3 = cx;
+                                                gen(jmp, 0, 0); /* 生成跳转，但循环体的地址未知，标记为0等待回填 */
+                                                cx4 = cx;
+                                                nxtlev[rparen] = true;
+                                                statement(nxtlev, ptx, lev, pdx);
+                                                gen(jmp, 0, cx1); /* 生成跳转指令，跳转到前面判断条件操作的位置 */
+                                                if (sym == rparen)
+                                                {
+
+                                                    getsym();
+                                                    code[cx3].a = cx;
+                                                    statement(fsys, ptx, lev, pdx); /* 循环体 */
+                                                    gen(jmp, 0, cx4);               /* 生成跳转指令，跳转到for到第三个参数 */
+                                                    code[cx2].a = cx;               /* 回填跳出循环的地址 */
+                                                }
+                                                else
+                                                {
+                                                    error(123); /*缺少右括号*/
+                                                }
+                                            }
+                                            else
+                                            {
+                                                error(121); /*缺少左括号*/
+                                            }
+                                        }
                                     }
                                 }
                             }
