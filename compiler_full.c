@@ -763,7 +763,6 @@ void block(int lev, int tx, bool *fsys)
         while (sym == procsym) /* 遇到过程声明符号，开始处理过程声明 */
         {
             getsym();
-
             if (sym == ident)
             {
                 enter(procedure, &tx, lev, &dx, false); /* 填写符号表 */
@@ -786,7 +785,6 @@ void block(int lev, int tx, bool *fsys)
             memcpy(nxtlev, fsys, sizeof(bool) * symnum);
             nxtlev[semicolon] = true;
             block(lev + 1, tx, nxtlev); /* 递归调用 */
-
             if (sym == semicolon)
             {
                 getsym();
@@ -1201,6 +1199,10 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                         cx1 = cx;                       /* 保存当前指令地址 */
                         gen(jpc, 0, 0);                 /* 生成条件跳转指令，跳转地址未知，暂时写0 */
                         statement(fsys, ptx, lev, pdx); /* 处理then后的语句 */
+                        if (sym == semicolon)
+                        {
+                            getsym();
+                        }
                         if (sym == endsym)
                         {
                             getsym();
@@ -1265,6 +1267,10 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                                 statement(fsys, ptx, lev, pdx); /* 循环体 */
                                 gen(jmp, 0, cx1);               /* 生成条件跳转指令，跳转到前面判断条件操作的位置 */
                                 code[cx2].a = cx;               /* 回填跳出循环的地址 */
+                                if (sym == semicolon)
+                                {
+                                    getsym();
+                                }
                             }
                             else
                             {

@@ -1,0 +1,29 @@
+var num,p,q;
+
+/* 判断num是否是素数，如果是则输出 */
+procedure isPrime;
+    var t;
+    begin
+        t:=0;
+        for(i:=2;i<num;i++)
+            begin
+                if num%i = 0 then
+                    begin
+                        t++;
+                    end;
+                end;
+            end;
+        if t=0 then
+            begin
+                write num;
+            end;
+        end;
+    end;
+
+begin
+for(j:=2;j<100;j++)
+    begin
+        num:=j;
+        call isPrime;
+    end
+end.
