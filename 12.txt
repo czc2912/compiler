@@ -1,0 +1,8 @@
+// if else
+var i,j;
+const a=4,b=6;
+begin
+j:=1;
+if j>1 then write a;
+else write b; end
+end.

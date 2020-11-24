@@ -21,7 +21,7 @@
 #define true 1
 #define false 0
 
-#define norw 25       /* 保留字个数 */
+#define norw 26       /* 保留字个数 */
 #define txmax 100     /* 符号表容量 */
 #define nmax 14       /* 数字的最大位数 */
 #define al 10         /* 标识符的最大长度 */
@@ -45,6 +45,7 @@ enum symbol
     slash,
     oddsym,
     eql, //10
+    elsesym,
     neq,
     lss,
     leq,
@@ -53,7 +54,7 @@ enum symbol
     lparen,
     rparen,
     comma,
-    semicolon, //19
+    semicolon, //20
     period,
     becomes,
     beginsym,
@@ -64,7 +65,7 @@ enum symbol
     writesym,
     readsym,
     dosym,
-    callsym, //30
+    callsym, //31
     constsym,
     varsym,
     procsym,
@@ -74,14 +75,14 @@ enum symbol
     falsesym,
     andsym,
     orsym,
-    notsym, //40
+    notsym, //41
     forsym,
     casesym,
     continuesym,
     exitsym,
     breaksym,
 };
-#define symnum 48
+#define symnum 47
 
 /* 符号表中的类型 */
 enum object
@@ -311,23 +312,24 @@ void init()
     strcpy(&(word[5][0]), "const");
     strcpy(&(word[6][0]), "continue");
     strcpy(&(word[7][0]), "do");
-    strcpy(&(word[8][0]), "end");
-    strcpy(&(word[9][0]), "exit");
-    strcpy(&(word[10][0]), "false");
-    strcpy(&(word[11][0]), "for");
-    strcpy(&(word[12][0]), "if");
-    strcpy(&(word[13][0]), "not");
-    strcpy(&(word[14][0]), "odd");
-    strcpy(&(word[15][0]), "or");
-    strcpy(&(word[16][0]), "procedure");
-    strcpy(&(word[17][0]), "read");
-    strcpy(&(word[18][0]), "repeat");
-    strcpy(&(word[19][0]), "then");
-    strcpy(&(word[20][0]), "true");
-    strcpy(&(word[21][0]), "until");
-    strcpy(&(word[22][0]), "var");
-    strcpy(&(word[23][0]), "while");
-    strcpy(&(word[24][0]), "write");
+    strcpy(&(word[8][0]), "else");
+    strcpy(&(word[9][0]), "end");
+    strcpy(&(word[10][0]), "exit");
+    strcpy(&(word[11][0]), "false");
+    strcpy(&(word[12][0]), "for");
+    strcpy(&(word[13][0]), "if");
+    strcpy(&(word[14][0]), "not");
+    strcpy(&(word[15][0]), "odd");
+    strcpy(&(word[16][0]), "or");
+    strcpy(&(word[17][0]), "procedure");
+    strcpy(&(word[18][0]), "read");
+    strcpy(&(word[19][0]), "repeat");
+    strcpy(&(word[20][0]), "then");
+    strcpy(&(word[21][0]), "true");
+    strcpy(&(word[22][0]), "until");
+    strcpy(&(word[23][0]), "var");
+    strcpy(&(word[24][0]), "while");
+    strcpy(&(word[25][0]), "write");
 
     /* 设置保留字符号 */
     wsym[0] = andsym;
@@ -338,23 +340,24 @@ void init()
     wsym[5] = constsym;
     wsym[6] = continuesym;
     wsym[7] = dosym;
-    wsym[8] = endsym;
-    wsym[9] = exitsym;
-    wsym[10] = falsesym;
-    wsym[11] = forsym;
-    wsym[12] = ifsym;
-    wsym[13] = notsym;
-    wsym[14] = oddsym;
-    wsym[15] = orsym;
-    wsym[16] = procsym;
-    wsym[17] = readsym;
-    wsym[18] = repeatsym;
-    wsym[19] = thensym;
-    wsym[20] = truesym;
-    wsym[21] = untilsym;
-    wsym[22] = varsym;
-    wsym[23] = whilesym;
-    wsym[24] = writesym;
+    wsym[8] = elsesym;
+    wsym[9] = endsym;
+    wsym[10] = exitsym;
+    wsym[11] = falsesym;
+    wsym[12] = forsym;
+    wsym[13] = ifsym;
+    wsym[14] = notsym;
+    wsym[15] = oddsym;
+    wsym[16] = orsym;
+    wsym[17] = procsym;
+    wsym[18] = readsym;
+    wsym[19] = repeatsym;
+    wsym[20] = thensym;
+    wsym[21] = truesym;
+    wsym[22] = untilsym;
+    wsym[23] = varsym;
+    wsym[24] = whilesym;
+    wsym[25] = writesym;
 
     /* 设置指令名称 */
     strcpy(&(mnemonic[lit][0]), "lit");
@@ -1186,6 +1189,7 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                         getsym();
                         memcpy(nxtlev, fsys, sizeof(bool) * symnum);
                         nxtlev[thensym] = true;
+                        nxtlev[elsesym] = true;
                         nxtlev[dosym] = true;        /* 后继符号为then或do */
                         condition(nxtlev, ptx, lev); /* 调用条件处理 */
                         if (sym == thensym)
@@ -1206,12 +1210,33 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                         if (sym == endsym)
                         {
                             getsym();
+                            code[cx1].a = cx; /* 经statement处理后，cx为then后语句执行完的位置，它正是前面未定的跳转地址，此时进行回填 */
+                        }
+                        else if (sym == elsesym)
+                        {
+                            getsym();
+                            cx2 = cx;
+                            gen(jmp, 0, 0);
+                            code[cx1].a = cx;
+                            statement(fsys, ptx, lev, pdx);
+                            if (sym == semicolon)
+                            {
+                                getsym();
+                            }
+                            if (sym == endsym)
+                            {
+                                getsym();
+                                code[cx2].a = cx;
+                            }
+                            else
+                            {
+                                error(131);
+                            }
                         }
                         else
                         {
                             error(119);
                         }
-                        code[cx1].a = cx; /* 经statement处理后，cx为then后语句执行完的位置，它正是前面未定的跳转地址，此时进行回填 */
                     }
                     else
                     {
@@ -1267,10 +1292,10 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                                 statement(fsys, ptx, lev, pdx); /* 循环体 */
                                 gen(jmp, 0, cx1);               /* 生成条件跳转指令，跳转到前面判断条件操作的位置 */
                                 code[cx2].a = cx;               /* 回填跳出循环的地址 */
-                                if (sym == semicolon)
-                                {
-                                    getsym();
-                                }
+                                // if (sym == semicolon)
+                                // {
+                                //     getsym();
+                                // }
                             }
                             else
                             {

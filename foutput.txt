@@ -1,29 +1,9 @@
-0 var num,p,q;
-1 
-1 procedure isPrime;
-1     var t;
-2     begin
-3         t:=0;
-5         for(i:=2;i<num;i++)
-17             begin
-17                 if num%i = 0 then
-22                     begin
-23                         t++;
-27                     end;
-27                 end;
-27             end;
-28         if t=0 then
-31             begin
-32                 write num;
-35             end;
-35         end;
-35     end;
-36 
-36 begin
-37 for(j:=2;j<100;j++)
-49     begin
-49         num:=j;
-51         call isPrime;
-52     end
-52 end.
+0 // if else
+0 var i,j;
+1 const a=4,b=6;
+1 begin
+2 j:=1;
+4 if j>1 then write a;
+11 else write b; end
+15 end.
 ===Parsing success!===
