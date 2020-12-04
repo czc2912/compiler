@@ -1,0 +1,8 @@
+// no begin end
+var i,j;
+const a=4,b=6;
+read j;
+write a;
+write b;
+// j:=1;
+write j.

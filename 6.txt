@@ -1,5 +1,5 @@
 // repeat+if
-begin
+//begin
     a:=0;
     // testdosgj
     if a = 0 then 
@@ -16,5 +16,12 @@ begin
         write a;
         end
     end;
-    write a;
-end.
+    a:=10;
+    repeat 
+        begin
+            write a;
+            a--;
+        end
+    until a<0;
+    write a.
+//end.

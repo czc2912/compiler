@@ -722,45 +722,75 @@ void block(int lev, int tx, bool *fsys)
         if (sym == constsym) /* 遇到常量声明符号，开始处理常量声明 */
         {
             getsym();
-            do
+            // do
+            // {
+            //     constdeclaration(&tx, lev, &dx); /* dx的值会被constdeclaration改变，使用指针 */
+            //     while (sym == comma)             /* 遇到逗号继续定义常量 */
+            //     {
+            //         getsym();
+            //         printf("constdeclaration\n");
+            //         constdeclaration(&tx, lev, &dx);
+            //     }
+            //     if (sym == semicolon) /* 遇到分号结束定义常量 */
+            //     {
+            //         getsym();
+            //     }
+            //     else
+            //     {
+            //         error(5); /* 漏掉了分号 */
+            //     }
+            // } while (sym == ident);
+            constdeclaration(&tx, lev, &dx); /* dx的值会被constdeclaration改变，使用指针 */
+            while (sym == comma)             /* 遇到逗号继续定义常量 */
             {
-                constdeclaration(&tx, lev, &dx); /* dx的值会被constdeclaration改变，使用指针 */
-                while (sym == comma)             /* 遇到逗号继续定义常量 */
-                {
-                    getsym();
-                    constdeclaration(&tx, lev, &dx);
-                }
-                if (sym == semicolon) /* 遇到分号结束定义常量 */
-                {
-                    getsym();
-                }
-                else
-                {
-                    error(5); /* 漏掉了分号 */
-                }
-            } while (sym == ident);
+                getsym();
+                printf("constdeclaration\n");
+                constdeclaration(&tx, lev, &dx);
+            }
+            if (sym == semicolon) /* 遇到分号结束定义常量 */
+            {
+                getsym();
+            }
+            else
+            {
+                error(5); /* 漏掉了分号 */
+            }
         }
         if (sym == varsym) /* 遇到变量声明符号，开始处理变量声明 */
         {
             getsym();
 
-            do
+            // do
+            // {
+            //     vardeclaration(&tx, lev, &dx);
+            //     while (sym == comma)
+            //     {
+            //         getsym();
+            //         vardeclaration(&tx, lev, &dx);
+            //     }
+            //     if (sym == semicolon)
+            //     {
+            //         getsym();
+            //     }
+            //     else
+            //     {
+            //         error(5); /* 漏掉了分号 */
+            //     }
+            // } while (sym == ident);
+            vardeclaration(&tx, lev, &dx);
+            while (sym == comma)
             {
+                getsym();
                 vardeclaration(&tx, lev, &dx);
-                while (sym == comma)
-                {
-                    getsym();
-                    vardeclaration(&tx, lev, &dx);
-                }
-                if (sym == semicolon)
-                {
-                    getsym();
-                }
-                else
-                {
-                    error(5); /* 漏掉了分号 */
-                }
-            } while (sym == ident);
+            }
+            if (sym == semicolon)
+            {
+                getsym();
+            }
+            else
+            {
+                error(5); /* 漏掉了分号 */
+            }
         }
 
         while (sym == procsym) /* 遇到过程声明符号，开始处理过程声明 */
@@ -805,7 +835,7 @@ void block(int lev, int tx, bool *fsys)
         nxtlev[ident] = true;
         nxtlev[constsym] = true;
         nxtlev[varsym] = true;
-        test(nxtlev, declbegsys, 7);
+        // test(nxtlev, declbegsys, 7);
     } while (inset(sym, declbegsys)); /* 直到没有声明符号 */
 
     code[table[tx0].adr].a = cx; /* 把前面生成的跳转语句的跳转位置改成当前位置 */
@@ -1269,6 +1299,7 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                             {
                                 error(17); /* 缺少end */
                             }
+                            return;
                         }
                         else
                         {
@@ -1355,7 +1386,74 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
                                                 getsym();
                                                 memcpy(nxtlev, fsys, sizeof(bool) * symnum);
                                                 nxtlev[semicolon] = true; /* 后继符号为分号 */
-                                                statement(nxtlev, ptx, lev, pdx);
+                                                // statement(nxtlev, ptx, lev, pdx);
+                                                if (sym == ident) /* 准备按照赋值语句处理 */
+                                                {
+                                                    i = position(id, *ptx); /* 查找标识符在符号表中的位置 */
+                                                    if (i == 0)
+                                                    {
+                                                        // error(11); /* 标识符未声明 */
+                                                        vardeclaration(ptx, lev, pdx);
+                                                        i = position(id, *ptx); /* 查找标识符在符号表中的位置 */
+                                                    }
+                                                    else
+                                                    {
+                                                        getsym();
+                                                    }
+                                                    if (table[i].kind != variable)
+                                                    {
+                                                        error(12); /* 赋值语句中，赋值号左部标识符应该是变量 */
+                                                        i = 0;
+                                                    }
+                                                    else
+                                                    {
+                                                        if (sym == becomes)
+                                                        {
+                                                            getsym();
+                                                            memcpy(nxtlev, fsys, sizeof(bool) * symnum);
+                                                            expression(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
+                                                            if (i != 0)
+                                                            {
+                                                                /* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
+                                                                gen(sto, lev - table[i].level, table[i].adr);
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            if (sym == plus)
+                                                            {
+                                                                if (ch == '+')
+                                                                {
+                                                                    gen(lod, lev - table[i].level, table[i].adr);
+                                                                    gen(lit, 0, 1);
+                                                                    gen(opr, 0, 2);
+                                                                    gen(sto, lev - table[i].level, table[i].adr);
+                                                                }
+                                                                getch();
+                                                                getsym();
+                                                            }
+                                                            else
+                                                            {
+                                                                if (sym == minus)
+                                                                {
+                                                                    if (ch == '-')
+                                                                    {
+                                                                        gen(lod, lev - table[i].level, table[i].adr);
+                                                                        gen(lit, 0, 1);
+                                                                        gen(opr, 0, 3);
+                                                                        gen(sto, lev - table[i].level, table[i].adr);
+                                                                    }
+                                                                    getch();
+                                                                    getsym();
+                                                                }
+                                                                else
+                                                                {
+                                                                    error(13); /* 没有检测到赋值符号或++或-- */
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                                 cx1 = cx;
                                                 if (sym == semicolon)
                                                 {
@@ -1410,8 +1508,24 @@ void statement(bool *fsys, int *ptx, int lev, int *pdx)
             }
         }
     }
+
+    while (inset(sym, statbegsys) || sym == semicolon)
+    {
+        if (sym == semicolon)
+        {
+            getsym();
+        }
+        else
+        {
+            error(10); /* 缺少分号 */
+        }
+        memcpy(nxtlev, fsys, sizeof(bool) * symnum);
+        nxtlev[semicolon] = true;
+        nxtlev[endsym] = true; /* 后继符号为分号或end */
+        statement(nxtlev, ptx, lev, pdx);
+    }
     memset(nxtlev, 0, sizeof(bool) * symnum); /* 语句结束无补救集合 */
-    test(fsys, nxtlev, 19);                   /* 检测语句结束的正确性 */
+    // test(fsys, nxtlev, 19);                   /* 检测语句结束的正确性 */
 }
 
 /*

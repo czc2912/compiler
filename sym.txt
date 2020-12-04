@@ -1,0 +1,51 @@
+enum symbol
+{
+    nul, //0
+    ident,
+    number,
+    plus,
+    minus,
+    times,
+    mod,
+    xor,
+    slash,
+    oddsym,
+    eql, //10
+    elsesym,
+    neq,
+    lss,
+    leq,
+    gtr,
+    geq,
+    lparen,
+    rparen,
+    comma,
+    semicolon, //20
+    period,
+    becomes,
+    beginsym,
+    endsym,
+    ifsym,
+    thensym,
+    whilesym,
+    writesym,
+    readsym,
+    dosym,
+    callsym, //31
+    constsym,
+    varsym,
+    procsym,
+    repeatsym,
+    untilsym,
+    truesym,
+    falsesym,
+    andsym,
+    orsym,
+    notsym, //41
+    forsym,
+    casesym,
+    continuesym,
+    exitsym,
+    breaksym,
+};
+#define symnum 47
