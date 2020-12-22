@@ -1,0 +1,62 @@
+var m,n,result;
+
+/* 非递归算法 */
+procedure GCD;
+    var t;
+    begin
+        if m<n then
+            begin
+                t:=m;
+                m:=n;
+                n:=t;
+                // write m,n;
+            end;
+        end;
+        while m%n # 0 do
+            begin
+                // write m,n;
+                t:=m%n;
+                m:=n;
+                n:=t
+            end;
+        result:=n;
+    end;
+
+/* 递归算法 */
+procedure GCD2;
+    var t;
+    begin
+        if m<n then
+            begin
+                t:=m;
+                m:=n;
+                n:=t;
+            end;
+        end;
+        if n # 0 then
+            begin
+                t:=n;
+                n:=m%n;
+                m:=t;
+                call GCD2; // GCD(n,m%n)
+            end;
+        end;
+        result:=n;
+        if n = 0 then
+            begin
+                result:=m;
+            end;
+        end;
+    end;
+
+
+begin
+read m;
+read n;
+call GCD;
+write result;
+read m;
+read n;
+call GCD2;
+write result;
+end.

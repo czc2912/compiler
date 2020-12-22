@@ -1,22 +1,12 @@
-0 //  测试repeat 和 if
-0 begin
-2 a:=0;
-4 b:=10;
-6 repeat
-6     begin
-6     write a;
-9     // test if
-9     if odd a then write b end;
-15     a:=a+1;
-19     end
-19 until a>10;
-25 b:=24;
-27 // 再测试一下 while
-27 while b<30 do
-31 begin
-31     write b;
-34     b:=b+1;
-38 end
-38 end.
-
+0 // for
+0 var i,j;
+1 const a=true,b=false;
+1 begin
+2 i:=8;
+4 j:=i % 5;
+8 write j;
+11 if not a then write 1;end;
+18 if not b then write 2; end;
+25 write 3 ^ 5;
+30 end.
 ===Parsing success!===

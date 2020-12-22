@@ -1,0 +1,10 @@
+// 测试boolean
+const a=false, b=10;
+const c=11;
+var d;
+begin
+write a+b;
+write b;
+// write c;
+if a and b then write 99; else write 98 end
+end.

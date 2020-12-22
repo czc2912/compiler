@@ -1,0 +1,11 @@
+// for
+var i,j;
+const a=true,b=false;
+begin
+i:=8;
+j:=i % 5;
+write j;
+if not a then write 1;end;
+if not b then write 2; end;
+write 3 ^ 5;
+end.

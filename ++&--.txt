@@ -1,0 +1,15 @@
+// 测试过程中++ -- 是否正确
+var a;
+procedure test;
+begin
+write a;
+a++;
+end;
+begin
+a:=0;
+call test;
+write a;
+a++;
+call test;
+write a;
+end.

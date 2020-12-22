@@ -1,0 +1,8 @@
+// if else
+var i,j;
+const a=4,b=6;
+begin
+write a;
+a:=5;
+write a;
+end.

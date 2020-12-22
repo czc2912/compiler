@@ -1,0 +1,23 @@
+// 稍微复杂一点的过程和read write
+/* 快注释 
+dfjgiojdof
+dfjgoi */
+const p=100;
+procedure plus;
+begin
+ a:=3;
+ b:=5;
+ x:=a+b;
+ write x;
+end;
+begin
+val:=0;
+read val;
+write val;
+a:=1;
+a:=val;
+write a;
+call plus;
+write a;
+end.
+
